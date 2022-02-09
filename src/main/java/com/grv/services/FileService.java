@@ -2,9 +2,7 @@ package com.grv.services;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,18 +13,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class FileService {
 	
-	public Map<String, List<String>> showFiles(String sourceDir) {
+	public static Map<String, List<String>> showFiles(String sourceDir) {
 		Map<String, List<String>> showDirFilesAndFolders = showDirFilesAndFolder(sourceDir);
 		return showDirFilesAndFolders;
 	}
 	
-	public List<String> showLatestFiles(String sourceDir){
+	public static List<String> showLatestFiles(String sourceDir){
 		List<String> latestFile = new ArrayList<>();
 		showLatestFile(sourceDir, latestFile);
 		return latestFile;
 	}
 
-	private void showLatestFile(String sourceDir, List<String> latestFile) {
+	private static void showLatestFile(String sourceDir, List<String> latestFile) {
 		File file = new File(sourceDir);
 		List<String> directory = new ArrayList<>();
 		
@@ -57,7 +55,7 @@ public class FileService {
 		}
 	}
 
-	private Map<String, List<String>> showDirFilesAndFolder(String source) {
+	private static Map<String, List<String>> showDirFilesAndFolder(String source) {
 		List<String> files = new ArrayList<String>();
 		List<String> dirs = new ArrayList<String>();
 		getFiles(source, files, dirs);
@@ -67,7 +65,7 @@ public class FileService {
 		return filesAndDirs;
 	}
 
-	private void getFiles(String source, List<String> files, List<String> dirs) {
+	private static void getFiles(String source, List<String> files, List<String> dirs) {
 		File[] listFiles = new File(source).listFiles();
 		if(listFiles.length>0)
 		for(File file: listFiles) {
@@ -91,5 +89,60 @@ public class FileService {
 		}
 	}
 	
+	public static Map<String, Map<String, List<String>>> getFolderStructure(String sourceDir) {
+		Map<String, Map<String,List<String>>> folderStructure = new HashMap<String, Map<String,List<String>>>();
+		File sourceFolders = new File(sourceDir);
+		for(File sourceFolder: sourceFolders.listFiles()) {
+			if(sourceFolder.isDirectory()) {
+				Map<String, List<String>> subFolders = new HashMap<String, List<String>>();
+				for(File subFolder: sourceFolder.listFiles()) {
+					if(subFolder.isDirectory()) {
+						List<String> files = new ArrayList<String>();
+						for(File file: subFolder.listFiles()) {
+							files.add(file.getName());
+						}
+						subFolders.put(subFolder.getName(), files);
+						folderStructure.put(sourceFolder.getName(), subFolders);
+					}
+				}
+			}
+		}
+		return folderStructure;
+	}
+	
+	public static List<String> getFolders(String sourceDir, String folder, String subFolder){
+		File source = null;
+		if(folder==null || folder=="") {
+			source = new File(sourceDir);
+		}else if(subFolder==null || subFolder==""){
+			source = new File(sourceDir+"\\"+folder);
+		}else {
+			source = new File(sourceDir+"\\"+folder+"\\"+subFolder);
+		}
+		//System.out.println(source.getPath());
+		List<String> dirs = new ArrayList<String>();
+		if(subFolder==null||subFolder=="") {
+			copyDirs(source, dirs);
+		}else {
+			copyFiles(source, dirs);
+		}
+		return dirs;
+	}
+
+	private static void copyFiles(File source, List<String> dirs) {
+		for(File subFolders: source.listFiles()) {
+			if(subFolders.isFile()) {
+				dirs.add(subFolders.getName());
+			}
+		}
+	}
+
+	private static void copyDirs(File source, List<String> dirs) {
+		for(File subFolders: source.listFiles()) {
+			if(subFolders.isDirectory()) {
+				dirs.add(subFolders.getName());
+			}
+		}
+	}
 	
 }

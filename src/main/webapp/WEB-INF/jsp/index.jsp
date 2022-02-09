@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page import="java.util.*" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -35,8 +36,117 @@
 	</table>
 	
 	<p>${latestFiles}</p>
-	<script type="text/javascript">
 	
+	<p>${folderStructure}</p>
+	<h2>Form 1</h2>
+	<form action="">
+		<label>Source Folder:</label>
+		<select id="sourceFolders" name="sourceFolder">
+			<option value=""></option>
+			<c:forEach items="${folderStructure}" var="sourceFolder">
+				<option value="${sourceFolder.key }">${sourceFolder.key}</option>
+			</c:forEach>
+		</select>
+		<br/>
+		<label>Sub Folder:</label>
+		<select id="" name="subFolder">
+		</select>
+	</form>
+	
+	<h2>Form 2</h2>
+	<form action="">
+		<label>Source Folder:</label>
+		<select id="srcFolders" name="srcFolders">
+			<option value=""></option>
+			<c:forEach items="${sourceFolders}" var="srcFolder">
+				<option value="${srcFolder}">${srcFolder}</option>
+			</c:forEach>
+		</select>
+		<br/>
+		<label>Sub Folder:</label>
+		<select id="subFolders" name="subFolders"></select>
+		<br/>
+		<label>Files</label>
+		<select id="files" name="files"></select>
+	</form>
+	
+	<script type="text/javascript">
+		var srcFolders = document.getElementById("srcFolders");
+		var subFolders = document.getElementById("subFolders");
+		var files = document.getElementById("files");
+		srcFolders.addEventListener("change", function(){
+			removeOptions(subFolders);
+			const xhttp = new XMLHttpRequest();
+			xhttp.open("GET", "/getFolders/"+srcFolders.value, false);
+			xhttp.send();
+			var response = xhttp.responseText;
+			response = changeResponseToArray(response);
+			var option = document.createElement("option");
+			option.value = "";
+			option.innerHTML = "";
+			subFolders.appendChild(option);
+			for(var i=0; i<response.length;i++){
+				var option = document.createElement("option");
+				option.value = response[i];
+				option.innerHTML = response[i];
+				subFolders.appendChild(option);
+			}
+			
+		});
+		subFolders.addEventListener("change", function(){
+			console.log("subFolders event triggered...");
+			removeOptions(files);
+			const xhttp = new XMLHttpRequest();
+			xhttp.open("GET", "/getsubFolders/"+srcFolders.value+"/"+subFolders.value, false);
+			xhttp.send();
+			var response = xhttp.responseText;
+			response = changeResponseToArray(response);
+			var option = document.createElement("option");
+			option.value = "";
+			option.innerHTML = "";
+			files.appendChild(option);
+			for(var i=0; i<response.length;i++){
+				var option = document.createElement("option");
+				option.value = response[i]
+				option.innerHTML = response[i];
+				files.appendChild(option);
+			}
+		});
+		function changeResponseToArray(response){
+			response = response.replaceAll("[","");
+			response = response.replaceAll("]","");
+			response = response.replaceAll("\"","");
+			response = response.split(",");
+			return response;
+		}
+	//***********************************************************************************
+		var sourceFolders = document.getElementById("sourceFolders");
+		var selectedSourceFolder = sourceFolders.value;
+		console.log(selectedSourceFolder);
+		sourceFolders.addEventListener("change", function(){
+			var subFolders = document.getElementById("subFolders");
+			console.log("subFolders: ", subFolders);
+
+			removeOptions(subFolders);
+			<%
+				Map<String, Map<String, List<String>>> subF = (Map)request.getAttribute("folderStructure");
+				for(String subFolder: subF.get("2021_NDC29").keySet()) {
+			%>
+				var option = document.createElement("option");
+				option.value = "<%=subFolder %>";
+				option.innerHTML = "<%=subFolder %>";
+				subFolders.appendChild(option);
+			<% 
+				}
+			%> 
+		});
+		
+		function removeOptions(selectElement) {
+			var i, L = selectElement.options.length - 1;
+			for(i = L; i >= 0; i--) {
+				selectElement.remove(i);
+			}
+		}
 	</script>
 </body>
 </html>
