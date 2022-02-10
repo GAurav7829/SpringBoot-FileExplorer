@@ -79,17 +79,21 @@
 			const xhttp = new XMLHttpRequest();
 			xhttp.open("GET", "/getFolders/"+srcFolders.value, false);
 			xhttp.send();
-			var response = xhttp.responseText;
-			response = changeResponseToArray(response);
-			var option = document.createElement("option");
-			option.value = "";
-			option.innerHTML = "";
-			subFolders.appendChild(option);
-			for(var i=0; i<response.length;i++){
+			if(xhttp.status==200){
+				var response = xhttp.responseText;
+				response = changeResponseToArray(response);
 				var option = document.createElement("option");
-				option.value = response[i];
-				option.innerHTML = response[i];
+				option.value = "";
+				option.innerHTML = "";
 				subFolders.appendChild(option);
+				for(var i=0; i<response.length;i++){
+					var option = document.createElement("option");
+					option.value = response[i];
+					option.innerHTML = response[i];
+					subFolders.appendChild(option);
+				}
+			}else{
+				//handle error
 			}
 			
 		});
@@ -99,17 +103,21 @@
 			const xhttp = new XMLHttpRequest();
 			xhttp.open("GET", "/getsubFolders/"+srcFolders.value+"/"+subFolders.value, false);
 			xhttp.send();
-			var response = xhttp.responseText;
-			response = changeResponseToArray(response);
-			var option = document.createElement("option");
-			option.value = "";
-			option.innerHTML = "";
-			files.appendChild(option);
-			for(var i=0; i<response.length;i++){
+			if(xhttp.status==200){
+				var response = xhttp.responseText;
+				response = changeResponseToArray(response);
 				var option = document.createElement("option");
-				option.value = response[i]
-				option.innerHTML = response[i];
+				option.value = "";
+				option.innerHTML = "";
 				files.appendChild(option);
+				for(var i=0; i<response.length;i++){
+					var option = document.createElement("option");
+					option.value = response[i]
+					option.innerHTML = response[i];
+					files.appendChild(option);
+				}
+			}else{
+				//handle error
 			}
 		});
 		function changeResponseToArray(response){
